@@ -1,0 +1,15 @@
+.THIS.notVisible {
+    display: none;
+}
+
+.THIS.makeVisible {
+    display: block;
+}
+
+.THIS.success {
+    background:#16325c
+}
+
+.THIS.error {
+    background:#FF0000
+}

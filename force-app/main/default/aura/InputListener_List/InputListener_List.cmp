@@ -1,0 +1,114 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    
+    <!-- init -->
+    <aura:handler name="init"    value="{!this}" action="{!c.doInit}"   />
+    <!-- destroy -->
+    <aura:handler name="destroy" value="{!this}" action="{!c.onDestroy}"/>
+    
+    <!-- voice message subscribers -->
+    <force:serviceCloudVoiceToolkitApi aura:id="voiceToolkitApi"/>
+    
+    <!-- chat message subscribers -->
+    <lightning:conversationToolkitApi aura:id="conversationKit" />
+    <aura:handler event="lightning:conversationNewMessage" action="{!c.onChatTranscriptCustomer}" />
+    <aura:handler event="lightning:conversationAgentSend" action="{!c.onChatTranscriptAgent}" />
+        
+    <!-- Regex - will be set on initilization based on the field type --> 
+    <aura:attribute name="validationRegex" type="String" />
+    <!-- Regex modifier - default to m for multi-line, may be changed based on the expected type. --> 
+    <aura:attribute name="regexModifiers" type="String" default="mi" />
+    <aura:attribute name="useRegex" type="Boolean" default="false" />
+    <!-- Defines the type and expected input on the lightning:input component 
+<aura:attribute name="inputType" type="String" default="radio" />-->
+        
+    <!-- List of options displayed to the end user - built up in the initialize -->
+    <aura:attribute name="options" type="List"/>    
+    <!-- Used by the checkbox group to hold the selected options. Built up in the initialize as required -->
+    <aura:attribute name="listFieldValue" type="List"/>
+
+    
+    <!-- parameters -->
+    <!-- The type of input we are expecting/wanting. Valid values are: Radio, Picklist, Checkbox -->
+    <aura:attribute name="fieldType" type="String" /> 
+    <!-- List of values/options to display -->
+    <aura:attribute name="listValues" type="String" />
+    <!-- ID of the current record who's page we're on. Only used to determine what record type we are dealing with. -->
+    <aura:attribute name="recordId" type="String" />
+    <!-- activeKeyword is the word that triggers the listening process -->
+    <aura:attribute name="activeKeyword" type="String" />
+    <!-- inactiveKeyword is the word that stops the listening process. It is also stopped after the input is received -->
+    <aura:attribute name="inactiveKeyword" type="String"/>
+    <!-- The label for the field you're filling out -->
+    <aura:attribute name="fieldLabel" type="String"/>
+    <!-- Value of the component which is getting populated by the listening process -->
+    <aura:attribute name="textFieldValue" type="String"/>   
+    <!-- Text to display when input is successfully detected -->
+    <aura:attribute name="successMessage" type="String" default="Customer Response Detected."/>
+    <!-- Text to display when there is an error with the input detected (e.g. doesn't match expected value(s)) -->
+    <aura:attribute name="errorMessage" type="String" />
+    <!-- Determines if the field being populate by the listening process can be edited by the agent. -->
+    <aura:attribute name="isDisabled" type="Boolean" default="false" />   
+    <!-- Required if you use the type 'Custom'. Determines the regex to use when extracting the value said by the customer. -->
+    <aura:attribute name="customRegex" type="String"  />    
+    
+    <!-- Used to set the current state - are we listening for input or not -->
+    <aura:attribute name="isListening" type="Boolean" default="false" />
+    <!-- Text to display when there is an error with the input detected (e.g. doesn't match expected value(s)) -->
+    <aura:attribute name="errorToDisplay" type="String" />
+    <!-- Text to display in the info section - will either be the error or success message -->
+    <aura:attribute name="infoMessage" type="String" />
+    
+
+    
+    <!-- for voice calls we need to go and load the VendorCallKey based on the record Id, this ensures we only listen to the right events -->
+    <aura:attribute name="record" type="Object" />
+    <force:recordData aura:id="recordLoader"
+      fields="VendorCallKey"
+      recordId="{!v.recordId}"
+      targetFields="{!v.record}"
+     />
+    
+    
+    <!-- ui -->
+    <div class="slds-form-element" style="padding:0.5rem;">
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_2-of-3">
+                <!-- The component that the input is captured/populated into. Either a textarea or standard input component --> 
+                <aura:if  isTrue="{!v.fieldType == 'radio'}">
+                    <lightning:radioGroup
+                                  label="{!v.fieldLabel}"
+                                  options="{!v.options}"
+                                  value="{!v.textFieldValue}"
+                                  type="radio"/>
+                </aura:if>
+                <aura:if  isTrue="{!v.fieldType == 'picklist'}">
+                    <lightning:select label="{!v.fieldLabel}" value="{!v.textFieldValue}">
+                        <aura:iteration items="{!v.options}" var="item">
+                        	<option value="{!item.value}" text="{!item.label}"></option>
+                        </aura:iteration>
+    			</lightning:select>
+                </aura:if>
+                <aura:if  isTrue="{!v.fieldType == 'checkbox'}">
+                    <lightning:checkboxGroup
+                        label="{!v.fieldLabel}"
+                        options="{!v.options }"
+                        value="{!v.listFieldValue }"
+                        onchange="{!c.handleChange }"/>
+                </aura:if>
+            </div>
+            <label class="slds-checkbox_toggle slds-col slds-size_1-of-3">
+                <span class="slds-form-element__label slds-m-bottom_none">Listen for input</span>
+                <ui:inputCheckbox aura:id="chkboxListening" change="{!c.setIsListening}" />
+                <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                    <span class="slds-checkbox_faux"></span>
+                    <span class="slds-checkbox_on">Listening...</span>
+                    <span class="slds-checkbox_off">Not Listening</span>
+                </span>
+            </label>
+        </div>
+    </div>
+    <!-- Information section - hidden on load, shown once input or error detected -->
+    <div aura:id="infoSection" class="slds-size_3-of-4 notVisible success" style="padding:0.5rem;">
+        <div class="slds-text-color_inverse">{!v.infoMessage}</div>  
+    </div>
+</aura:component>
