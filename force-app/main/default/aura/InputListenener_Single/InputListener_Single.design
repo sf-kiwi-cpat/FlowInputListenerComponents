@@ -1,0 +1,18 @@
+<design:component>
+    <!-- This really needs a Context Property Editor, but they aren't supported on Aura Components. We could combine the two components with one --> 
+    <design:attribute name="fieldLabel" label="01. Label" required="true" description="What is the label displayed to the user for your component?"/>
+    <design:attribute name="recordId" label="02. Record Id" required="true" description="The ID of the object we are listening to input from (e.g. VoiceCall, MessagingSession or ChatTranscript). Ensures we only listen to events from the correct record."/>
+    <design:attribute name="fieldType" label="03. Field Type" required="true" description="The type of input we are expecting/wanting. Valid values are: Text,TextArea,Number,Currency,Phone,Email,Checkbox,Toggle" datasource="Text,TextArea,Number,Currency,Phone,Email,Checkbox,Toggle" default="Text" />
+    <design:attribute name="textFieldValue" label="04. Field Value" description="Value that is set in the component - pass in a Flow Variable of the right type to this to store the value." />
+    <design:attribute name="activeKeyword" label="05. Active Keyword" description="What is the keyword that when said by the agent will trigger this component to start listening for input? Without this, it will need to be manually triggered."/>
+	<design:attribute name="inactiveKeyword" label="06. Inactive Keyword" description="What is the keyword that when said by the agent will trigger this component to stop listening for input? Note - it will automatically stop once input is received."/>
+    <design:attribute name="isDisabled" label="07. Is Disabled" description="Determines if the field is disabled or not, preventing the agent from editing/updating." default="false" />
+    <design:attribute name="customRegex" label="08. Custom Regex" description="Overrides the default regex to use for the field type when extracting the value passed by the customer (e.g. an Account Number or Order Number)." />
+    <design:attribute name="successMessage" label="09. Success Message" description="Message displayed when input is successfully detected and the field is updated." default="Customer Response Detected." />
+    <design:attribute name="errorMessage" label="10. Error Message" description="Text to display when there is an error with the input detected (e.g. doesn't match expected value(s))." />
+    
+    <design:supportedFormFactors>
+        <design:supportedFormFactor type="Large"/>
+        <design:supportedFormFactor type="Small"/>
+    </design:supportedFormFactors>
+</design:component>
